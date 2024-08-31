@@ -5,8 +5,8 @@ from fastapi.responses import PlainTextResponse
 from src.week_3.day_4_robust_rag.main import *
 # from src.week_3.day_4_robust_rag.utils.helpers import *
 from src.week_3.day_4_robust_rag.utils.models import LLMClient
-from dotenv import load_dotenv
-load_dotenv()
+from dotenv import load_dotenv;load_dotenv()
+from src.config.appconfig import groq_key
 
 app = FastAPI()
 
@@ -57,7 +57,7 @@ async def process(
                 # embedding.storage_context.persist(persist_dir=embedding_save_dir)
 
                 collection_name = projectUuid
-                chroma_collection = init_chroma(collection_name, path="C:/Users/HP/chroma_db")
+                chroma_collection = init_chroma(collection_name, path=r"src\week_3\day_4_robust_rag\chromadb")
 
                 print(f"Existing collection size::: {get_kb_size(chroma_collection)}...")
 
@@ -96,8 +96,8 @@ async def generate_chat(
     temperature = query["temperature"]
 
     init_client = LLMClient(
-        groq_api_key = GROQ_API_KEY, 
-        secrets_path="./service_account.json",
+        groq_api_key = groq_key,
+        secrets_path=r"src\config\service_account.json",
         temperature=temperature,
         max_output_tokens=512
     )
@@ -109,7 +109,7 @@ async def generate_chat(
     # storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
     # embedding = load_index_from_storage(storage_context)
 
-    chroma_collection = init_chroma(query['projectUuid'], path="C:/Users/HP/chroma_db")
+    chroma_collection = init_chroma(query['projectUuid'], path=r"src\week_3\day_4_robust_rag\chromadb")
     collection_size = get_kb_size(chroma_collection)
     print(f"Retrieved collection size::: {collection_size}...")
 

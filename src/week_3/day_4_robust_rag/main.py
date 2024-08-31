@@ -1,5 +1,9 @@
 # import numpy as np
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from src.week_3.day_4_robust_rag.utils.helpers import *
+from src.config import appconfig
 
 print("...")
 
@@ -7,8 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set GROQ_API_KEY = "your api key" in the .env file, then load it below
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-# print(GROQ_API_KEY)
+GROQ_API_KEY = appconfig.groq_key
+print(GROQ_API_KEY)
 
 models = [
     # "llama-3.1-405b-reasoning",

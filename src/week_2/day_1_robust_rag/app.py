@@ -107,5 +107,5 @@ async def generate_chat(
 if __name__ == "__main__":
     import uvicorn
     print("Starting LLM API")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", reload=True)
 
