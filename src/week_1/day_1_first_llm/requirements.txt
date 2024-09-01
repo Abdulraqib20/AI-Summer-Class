@@ -1,4 +1,0 @@
-groq
-uvicorn
-fastapi
-python-dotenv

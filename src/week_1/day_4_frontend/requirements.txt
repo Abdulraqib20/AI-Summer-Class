@@ -1,4 +1,0 @@
-groq
-fastapi
-streamlit
-uvicorn
