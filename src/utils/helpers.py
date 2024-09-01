@@ -1,6 +1,5 @@
-import os, chromadb
+import os
 from werkzeug.utils import secure_filename
-from src.exceptions.operationshandler import system_logger
 from llama_index.llms.groq import Groq
 from llama_index.core import (
     VectorStoreIndex, 
@@ -10,6 +9,9 @@ from llama_index.core import (
 )
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+import chromadb
+
+from src.exceptions.operationshandler import system_logger, eval_logger, llmresponse_logger, userops_logger
 
 
 
@@ -78,7 +80,7 @@ async def upload_files(files, temp_dir):
     return checks
 
 
-def init_chroma(collection_name, path=r"src\week_3\day_4_robust_rag\chromadb"):
+def init_chroma(collection_name, path=r"src\chromadb"):
     db = chromadb.PersistentClient(path=path)
     chroma_collection = db.get_or_create_collection(collection_name)
     return chroma_collection

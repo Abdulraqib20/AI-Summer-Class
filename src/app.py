@@ -2,12 +2,20 @@ import os, tempfile, traceback
 from typing import List, Literal, Any
 from fastapi import FastAPI, Request, Form, UploadFile, Depends
 from fastapi.responses import PlainTextResponse
-from src.week_3.day_4_robust_rag.main import *
-from src.week_3.day_4_robust_rag.utils.helpers import (
-    system_logger, upload_files, QueryEngineError, init_chroma, get_vector_store, get_kb_size
+from llama_index.core import (
+    VectorStoreIndex, 
+    SimpleDirectoryReader, 
+    Settings, StorageContext, 
+    load_index_from_storage
 )
-from src.week_3.day_4_robust_rag.utils.models import LLMClient
+
+from src.utils.helpers import (
+    upload_files, QueryEngineError, init_chroma, get_vector_store, get_kb_size
+)
+from src.exceptions.operationshandler import system_logger
+from src.utils.models import LLMClient
 from dotenv import load_dotenv;load_dotenv()
+from src.main import qa_engine
 from src.config.appconfig import groq_key
 
 app = FastAPI()
@@ -59,7 +67,7 @@ async def process(
                 
                 
                 collection_name = projectUuid
-                chroma_collection = init_chroma(collection_name=collection_name, path=r"src\week_3\day_4_robust_rag\chromadb")
+                chroma_collection = init_chroma(collection_name=collection_name, path=r"src\chromadb")
                 
                 print(f"Existing collection size ::: {get_kb_size(chroma_collection)}")
                 
@@ -117,7 +125,7 @@ async def generate_chat(
     # storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
     # embedding = load_index_from_storage(storage_context)
     
-    chroma_collection = init_chroma(collection_name=query["projectUuid"], path=r"src\week_3\day_4_robust_rag\chromadb")
+    chroma_collection = init_chroma(collection_name=query["projectUuid"], path=r"src\chromadb")
     collection_size = get_kb_size(chroma_collection)
     print(f"Retrieved collection size ::: {collection_size}")
     

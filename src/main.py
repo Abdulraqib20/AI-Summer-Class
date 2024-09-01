@@ -2,8 +2,6 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from src.week_3.day_4_robust_rag.utils.helpers import system_logger
-from src.config import appconfig
 from llama_index.llms.groq import Groq
 from llama_index.core import (
     VectorStoreIndex, 
@@ -14,10 +12,12 @@ from llama_index.core import (
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
+from src.config import appconfig
+from dotenv import load_dotenv;load_dotenv()
+
 print("...")
 
-from dotenv import load_dotenv
-load_dotenv()
+
 
 # Set GROQ_API_KEY = "your api key" in the .env file, then load it below
 GROQ_API_KEY = appconfig.groq_key
