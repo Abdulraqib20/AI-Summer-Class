@@ -90,7 +90,9 @@ def get_vector_store(chroma_collection):
     
     # assign chroma as the vector_store to the context
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    # storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+    # return vector_store, storage_context
     return vector_store
 
 

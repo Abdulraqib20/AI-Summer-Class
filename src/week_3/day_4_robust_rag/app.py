@@ -3,7 +3,9 @@ from typing import List, Literal, Any
 from fastapi import FastAPI, Request, Form, UploadFile, Depends
 from fastapi.responses import PlainTextResponse
 from src.week_3.day_4_robust_rag.main import *
-from src.week_3.day_4_robust_rag.utils.helpers import system_logger, upload_files, QueryEngineError
+from src.week_3.day_4_robust_rag.utils.helpers import (
+    system_logger, upload_files, QueryEngineError, init_chroma, get_vector_store, get_kb_size
+)
 from src.week_3.day_4_robust_rag.utils.models import LLMClient
 from dotenv import load_dotenv;load_dotenv()
 from src.config.appconfig import groq_key
@@ -48,12 +50,28 @@ async def process(
             if _uploaded["status_code"]==200:
 
                 documents = SimpleDirectoryReader(temp_dir).load_data()
-                embedding = VectorStoreIndex.from_documents(documents)
-
-                embedding_save_dir = f"src/week_3/day_4_robust_rag/vector_db/{projectUuid}"
-                os.makedirs(embedding_save_dir, exist_ok=True)
                 
-                embedding.storage_context.persist(persist_dir=embedding_save_dir)
+                
+                # embedding = VectorStoreIndex.from_documents(documents)
+                # embedding_save_dir = f"src/week_3/day_4_robust_rag/vector_db/{projectUuid}"
+                # os.makedirs(embedding_save_dir, exist_ok=True)
+                # embedding.storage_context.persist(persist_dir=embedding_save_dir)
+                
+                
+                collection_name = projectUuid
+                chroma_collection = init_chroma(collection_name=collection_name, path=r"src\week_3\day_4_robust_rag\chromadb")
+                
+                print(f"Existing collection size ::: {get_kb_size(chroma_collection)}")
+                
+                vector_store = get_vector_store(chroma_collection=chroma_collection)
+                storage_context = StorageContext.from_defaults(vector_store=vector_store)
+                
+                embedding = VectorStoreIndex.from_documents(
+                    documents=documents,
+                    storage_context=storage_context
+                )
+                
+                print(f"Collection size after new Embeddings ::: {get_kb_size(chroma_collection)}")
                 
                 return {
                     'detail': 'Embeddings generated succesfully',
@@ -95,9 +113,34 @@ async def generate_chat(
     
     llm_client = init_client.map_client_to_model(model)
     
-    embedding_path = f'src/week_3/day_4_robust_rag/vector_db/{query["projectUuid"]}'
-    storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
-    embedding = load_index_from_storage(storage_context)
+    # embedding_path = f'src/week_3/day_4_robust_rag/vector_db/{query["projectUuid"]}'
+    # storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
+    # embedding = load_index_from_storage(storage_context)
+    
+    chroma_collection = init_chroma(collection_name=query["projectUuid"], path=r"src\week_3\day_4_robust_rag\chromadb")
+    collection_size = get_kb_size(chroma_collection)
+    print(f"Retrieved collection size ::: {collection_size}")
+    
+    vector_store = get_vector_store(chroma_collection=chroma_collection)
+    # storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    embedding = VectorStoreIndex.from_vector_store(
+        vector_store=vector_store,
+        # storage_context=storage_context
+    )
+    
+    def determine_choice_k(collection_size):
+        if collection_size > 150:
+            return 40
+        elif collection_size > 50:
+            return 20
+        elif collection_size > 20:
+            return 10
+        else:
+            return 5
+
+    choice_k = determine_choice_k(collection_size)
+
+    print(f"Retrieving top {choice_k} chunks from knowledge base ::: {collection_size}")
 
     try:
         # Generate the response using the QA engine
@@ -105,6 +148,7 @@ async def generate_chat(
             query["question"], 
             embedding,
             llm_client,
+            choice_k=choice_k
         )
 
         print(response.response)
