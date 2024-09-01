@@ -2,8 +2,17 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from src.week_3.day_4_robust_rag.utils.helpers import *
+from src.week_3.day_4_robust_rag.utils.helpers import system_logger
 from src.config import appconfig
+from llama_index.llms.groq import Groq
+from llama_index.core import (
+    VectorStoreIndex, 
+    SimpleDirectoryReader, 
+    Settings, StorageContext, 
+    load_index_from_storage
+)
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 print("...")
 

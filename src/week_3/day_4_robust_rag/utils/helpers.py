@@ -78,7 +78,7 @@ async def upload_files(files, temp_dir):
     return checks
 
 
-def init_chroma(collection_name, path="C:/Users/HP/chroma_db"):
+def init_chroma(collection_name, path=r"src\week_3\day_4_robust_rag\chromadb"):
     db = chromadb.PersistentClient(path=path)
     chroma_collection = db.get_or_create_collection(collection_name)
     return chroma_collection

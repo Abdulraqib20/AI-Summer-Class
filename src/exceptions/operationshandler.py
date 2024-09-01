@@ -21,12 +21,14 @@ def setup_logger(
 
     logger = logging.getLogger(logger_name)
     logger.setLevel(log_level)
-
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(log_level)
-    format = logging.Formatter('%(asctime)s - %(name)s- %(levelname)s - %(message)s')
-    file_handler.setFormatter(format)
-    logger.addHandler(file_handler)
+    
+    # Ensure the logger doesn't add duplicate handlers
+    if not logger.handlers:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(log_level)
+        format = logging.Formatter('%(asctime)s - %(name)s- %(levelname)s - %(message)s')
+        file_handler.setFormatter(format)
+        logger.addHandler(file_handler)
 
     return logger
 
@@ -57,17 +59,32 @@ folder_name = "logs"
 log_files_to_create = [
     "system.log",
     "userops.log",
-    "llmresponse.log"
+    "llmresponse.log",
+    "evals.log"
 ]
 
 for file in log_files_to_create:
     create_folder_and_log_file(folder_name, file)
 
 
-system_logger = setup_logger(__name__, f'{current_working_directory}/logs/system.log') # system logger
-userops_logger = setup_logger("userLogger", f'{current_working_directory}/logs/userops.log') # user logger
-llmresponse_logger = setup_logger("LLMResponseLogger", f'{current_working_directory}/logs/llmresponse.log') # llm response logger
+# Create loggers for each log file
+system_logger = setup_logger(
+    logger_name="system_logger", 
+    log_file=f'{current_working_directory}/logs/system.log'
+) # system logger
 
+userops_logger = setup_logger(
+    logger_name="userops_logger", 
+    log_file=f'{current_working_directory}/logs/userops.log'
+) # user logger
 
+llmresponse_logger = setup_logger(
+    logger_name="llmresponse_logger", 
+    log_file=f'{current_working_directory}/logs/llmresponse.log'
+) # llm response logger
 
+eval_logger = setup_logger(
+    logger_name="eval_logger",
+    log_file=f'{current_working_directory}/logs/evals.log'
+) # evaluation logger
 

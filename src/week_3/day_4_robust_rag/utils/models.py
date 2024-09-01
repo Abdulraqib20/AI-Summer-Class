@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from llama_index.llms.groq import Groq
 from llama_index.llms.vertex import Vertex
 from llama_index.llms.anthropic import Anthropic
-from src.week_3.day_4_robust_rag.utils.anthropic_base import Anthropic
+# from src.week_3.day_4_robust_rag.utils.anthropic_base import Anthropic
 from anthropic import AnthropicVertex
 from google.oauth2 import service_account
 # import google.auth as google_auth
@@ -91,9 +91,12 @@ class LLMClient(BaseModel):
 
         return Anthropic(
             model=model,
-            vertex_client=vertex_client,
+            # vertex_client=vertex_client,
+            api_key=access_token,
+            project_id=credentials.project_id,
+            region=region_mapping.get(model),
             temperature=self.temperature,
-            max_tokens=self.max_output_tokens
+            max_tokens=self.max_output_tokens,
         )
     
     def map_client_to_model(self, model):
