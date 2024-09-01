@@ -76,3 +76,142 @@ Traceback (most recent call last):
   File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\llms\anthropic\utils.py", line 35, in anthropic_modelname_to_contextsize
     raise ValueError(
 ValueError: Unknown model: claude-3-3-opus@20240229. Please provide a valid Anthropic model name.Known models are: claude-instant-1, claude-instant-1.2, claude-2, claude-2.0, claude-2.1, claude-3-opus-20240229, claude-3-opus@20240229, claude-3-sonnet-20240229, claude-3-sonnet@20240229, claude-3-haiku-20240307, claude-3-haiku@20240307, claude-3-5-sonnet-20240620, claude-3-5-sonnet@20240620
+2024-09-01 11:31:08,314 - system_logger- ERROR - ('An error occured where claude-3-5-sonnet@20240620 was trying to generate a response: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.',)
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\week_3\day_4_robust_rag\app.py", line 97, in generate_chat
+    response = qa_engine(
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\week_3\day_4_robust_rag\main.py", line 96, in qa_engine
+    response = query_engine.query(query)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\base\base_query_engine.py", line 52, in query
+    query_result = self._query(str_or_query_bundle)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\query_engine\retriever_query_engine.py", line 176, in _query
+    response = self._response_synthesizer.synthesize(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\base.py", line 241, in synthesize
+    response_str = self.get_response(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\compact_and_refine.py", line 43, in get_response
+    return super().get_response(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\refine.py", line 172, in get_response
+    response = self._give_response_single(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\refine.py", line 227, in _give_response_single
+    program(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\refine.py", line 79, in __call__
+    answer = self._llm.predict(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\llms\llm.py", line 575, in predict
+    chat_response = self.chat(messages)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\llms\callbacks.py", line 176, in wrapped_llm_chat
+    f_return_val = f(_self, messages, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\llms\anthropic\base.py", line 238, in chat
+    response = self._client.messages.create(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_utils\_utils.py", line 277, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\resources\messages.py", line 899, in create
+    return self._post(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_base_client.py", line 1239, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_base_client.py", line 921, in request
+    return self._request(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_base_client.py", line 943, in _request
+    self._prepare_request(request)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\lib\vertex\_client.py", line 170, in _prepare_request
+    access_token = self._ensure_access_token()
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\lib\vertex\_client.py", line 183, in _ensure_access_token
+    self._credentials, project_id = load_auth(project_id=self.project_id)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\lib\vertex\_auth.py", line 21, in load_auth
+    credentials, loaded_project_id = google_auth.default(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\google\auth\_default.py", line 691, in default
+    raise exceptions.DefaultCredentialsError(_CLOUD_SDK_MISSING_CREDENTIALS)
+google.auth.exceptions.DefaultCredentialsError: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.
+2024-09-01 11:31:37,025 - system_logger- ERROR - ('An error occured where claude-3-3-opus@20240229 was trying to generate a response: Unknown model: claude-3-3-opus@20240229. Please provide a valid Anthropic model name.Known models are: claude-instant-1, claude-instant-1.2, claude-2, claude-2.0, claude-2.1, claude-3-opus-20240229, claude-3-opus@20240229, claude-3-sonnet-20240229, claude-3-sonnet@20240229, claude-3-haiku-20240307, claude-3-haiku@20240307, claude-3-5-sonnet-20240620, claude-3-5-sonnet@20240620',)
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\week_3\day_4_robust_rag\app.py", line 97, in generate_chat
+    response = qa_engine(
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\week_3\day_4_robust_rag\main.py", line 95, in qa_engine
+    query_engine = index.as_query_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\indices\base.py", line 380, in as_query_engine
+    return RetrieverQueryEngine.from_args(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\query_engine\retriever_query_engine.py", line 99, in from_args
+    response_synthesizer = response_synthesizer or get_response_synthesizer(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\factory.py", line 62, in get_response_synthesizer
+    llm.metadata,
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\llms\anthropic\base.py", line 191, in metadata
+    context_window=anthropic_modelname_to_contextsize(self.model),
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\llms\anthropic\utils.py", line 35, in anthropic_modelname_to_contextsize
+    raise ValueError(
+ValueError: Unknown model: claude-3-3-opus@20240229. Please provide a valid Anthropic model name.Known models are: claude-instant-1, claude-instant-1.2, claude-2, claude-2.0, claude-2.1, claude-3-opus-20240229, claude-3-opus@20240229, claude-3-sonnet-20240229, claude-3-sonnet@20240229, claude-3-haiku-20240307, claude-3-haiku@20240307, claude-3-5-sonnet-20240620, claude-3-5-sonnet@20240620
+2024-09-01 11:53:32,126 - system_logger- ERROR - ('An error occured where claude-3-5-sonnet@20240620 was trying to generate a response: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.',)
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\week_3\day_4_robust_rag\app.py", line 98, in generate_chat
+    response = qa_engine(
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\week_3\day_4_robust_rag\main.py", line 96, in qa_engine
+    response = query_engine.query(query)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\base\base_query_engine.py", line 52, in query
+    query_result = self._query(str_or_query_bundle)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\query_engine\retriever_query_engine.py", line 176, in _query
+    response = self._response_synthesizer.synthesize(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\base.py", line 241, in synthesize
+    response_str = self.get_response(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\compact_and_refine.py", line 43, in get_response
+    return super().get_response(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\refine.py", line 172, in get_response
+    response = self._give_response_single(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\refine.py", line 227, in _give_response_single
+    program(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\response_synthesizers\refine.py", line 79, in __call__
+    answer = self._llm.predict(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\llms\llm.py", line 575, in predict
+    chat_response = self.chat(messages)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 261, in wrapper
+    result = func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\llms\callbacks.py", line 176, in wrapped_llm_chat
+    f_return_val = f(_self, messages, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\llms\anthropic\base.py", line 238, in chat
+    response = self._client.messages.create(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_utils\_utils.py", line 277, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\resources\messages.py", line 899, in create
+    return self._post(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_base_client.py", line 1239, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_base_client.py", line 921, in request
+    return self._request(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\_base_client.py", line 943, in _request
+    self._prepare_request(request)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\lib\vertex\_client.py", line 170, in _prepare_request
+    access_token = self._ensure_access_token()
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\lib\vertex\_client.py", line 183, in _ensure_access_token
+    self._credentials, project_id = load_auth(project_id=self.project_id)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\anthropic\lib\vertex\_auth.py", line 21, in load_auth
+    credentials, loaded_project_id = google_auth.default(
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\google\auth\_default.py", line 691, in default
+    raise exceptions.DefaultCredentialsError(_CLOUD_SDK_MISSING_CREDENTIALS)
+google.auth.exceptions.DefaultCredentialsError: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.

@@ -83,11 +83,11 @@ class LLMClient(BaseModel):
             "claude-3-opus@20240229": "us-central1",
         }
 
-        vertex_client = AnthropicVertex(
-            access_token=access_token,
-            project_id=credentials.project_id,
-            region=region_mapping.get(model)
-        )
+        # vertex_client = AnthropicVertex(
+        #     access_token=access_token,
+        #     project_id=credentials.project_id,
+        #     region=region_mapping.get(model)
+        # )
 
         return Anthropic(
             model=model,

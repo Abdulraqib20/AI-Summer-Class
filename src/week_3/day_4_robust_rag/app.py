@@ -10,21 +10,21 @@ from src.config.appconfig import groq_key
 
 app = FastAPI()
 
-class EmbeddingState:
-    """
-    Implementation of dependency injection intended for working locally with \
-        embeddings via in-session storage. It allows you to have session-wide access \
-            to embeddings across the different endpoints. \
-                This is not ideal for production.
-    """
+# class EmbeddingState:
+#     """
+#     Implementation of dependency injection intended for working locally with \
+#         embeddings via in-session storage. It allows you to have session-wide access \
+#             to embeddings across the different endpoints. \
+#                 This is not ideal for production.
+#     """
 
-    def __init__(self):
-        self.embedding = None
+#     def __init__(self):
+#         self.embedding = None
 
-    def get_embdding_state():
-        return state
+#     def get_embdding_state():
+#         return state
 
-state = EmbeddingState()
+# state = EmbeddingState()
 
 @app.get('/healthz')
 async def health():
@@ -35,7 +35,7 @@ async def health():
 
 @app.post('/upload')
 async def process(
-    # projectUuid: str = Form(...),
+    projectUuid: str = Form(...),
     files: List[UploadFile] = None,
     # state: EmbeddingState = Depends(EmbeddingState.get_embdding_state)
 ):
@@ -49,7 +49,11 @@ async def process(
 
                 documents = SimpleDirectoryReader(temp_dir).load_data()
                 embedding = VectorStoreIndex.from_documents(documents)
-                embedding.storage_context.persist(persist_dir=r'src\week_3\day_4_robust_rag\vector_db')
+
+                embedding_save_dir = f"src/week_3/day_4_robust_rag/vector_db/{projectUuid}"
+                os.makedirs(embedding_save_dir, exist_ok=True)
+                
+                embedding.storage_context.persist(persist_dir=embedding_save_dir)
                 
                 return {
                     'detail': 'Embeddings generated succesfully',
@@ -83,13 +87,16 @@ async def generate_chat(
     
     init_client = LLMClient(
         groq_api_key = groq_key,
-        secrets_path=r"src\config\service_account.json",
+        secrets_path="./service_account.json",
+        # secrets_path=r"src\config\service_account.json",
         temperature=temperature,
         max_output_tokens=512
     )
     
     llm_client = init_client.map_client_to_model(model)
-    storage_context = StorageContext.from_defaults(persist_dir=r'src\week_3\day_4_robust_rag\vector_db')
+    
+    embedding_path = f'src/week_3/day_4_robust_rag/vector_db/{query["projectUuid"]}'
+    storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
     embedding = load_index_from_storage(storage_context)
 
     try:

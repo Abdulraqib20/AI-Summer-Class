@@ -90,7 +90,7 @@ def upload_doc(dir):
     return index
 
 
-def qa_engine(query: str, index, llm_client, choice_k=3):
+def qa_engine(query: str, index, llm_client, choice_k=5):
     
     query_engine = index.as_query_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
     response = query_engine.query(query)
