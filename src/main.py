@@ -6,7 +6,8 @@ from llama_index.llms.groq import Groq
 from llama_index.core import (
     VectorStoreIndex, 
     SimpleDirectoryReader, 
-    Settings, StorageContext, 
+    Settings, 
+    StorageContext, 
     load_index_from_storage
 )
 from llama_index.vector_stores.chroma import ChromaVectorStore
@@ -14,6 +15,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from src.config import appconfig
 from dotenv import load_dotenv;load_dotenv()
+from src.utils.chat_memory import chat_memory_manager, generate_session_id
 
 print("...")
 
@@ -62,7 +64,7 @@ def upload_doc(dir):
     documents = SimpleDirectoryReader(dir).load_data() 
 
     """You can apply splitting with global Settings"""
-    Settings.text_splitter = TokenTextSplitter(chunk_size=1024, chunk_overlap=20) # 1024 is default chunk_size
+    Settings.text_splitter = TokenTextSplitter(chunk_size=1024, chunk_overlap=20)
     index = VectorStoreIndex.from_documents(documents)
 
     """
@@ -90,22 +92,43 @@ def upload_doc(dir):
     return index
 
 
-def qa_engine(query: str, index, llm_client, choice_k=5):
+def qa_engine(query: str, index, llm_client, choice_k=5, session_id=None):
+    chat_engine = index.as_chat_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
+    if session_id:
+        chat_engine = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
     
-    query_engine = index.as_query_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
-    response = query_engine.query(query)
+    response = chat_engine.chat(query)
+    
+    if session_id:
+        chat_memory_manager.add_message(session_id, "human", query)
+        chat_memory_manager.add_message(session_id, "ai", response.response)
 
     return response
 
 
+
 if __name__ == "__main__":
     index = upload_doc("./data")
-    query = input("Ask me anything: ")
-    model = input("Enter model code: ")
-
-    llm_client = Groq(model, api_key=GROQ_API_KEY, temperature=0.1)
-
-    response = qa_engine(query, index, llm_client)
-
-    print(response)
+    session_id = generate_session_id()
+    print(f"Session ID: {session_id}")
+    
+    while True:
+        query = input("Ask me anything (or type 'quit' to exit): ")
+        if query.lower() == 'quit':
+            break
+        
+        model = input("Enter model code: ")
+        llm_client = Groq(model, api_key=GROQ_API_KEY, temperature=0.1)
+        
+        response = qa_engine(query, index, llm_client, session_id)
+        print(response)
+        
+        print("\n Chat History: ")
+        for role, message in chat_memory_manager.get_chat_history(session_id):
+            print(f"{role.capitalize()}: {message}")
+            
+        clear_history = input("Do you want to clear the chat history? (yes/no): ")
+        if clear_history.lower() == 'yes':
+            chat_memory_manager.clear_chat_history(session_id)
+            print("Chat history cleared.")
 

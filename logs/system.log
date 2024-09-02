@@ -215,3 +215,10 @@ Traceback (most recent call last):
   File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\google\auth\_default.py", line 691, in default
     raise exceptions.DefaultCredentialsError(_CLOUD_SDK_MISSING_CREDENTIALS)
 google.auth.exceptions.DefaultCredentialsError: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.
+2024-09-02 13:37:15,588 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: 'ReActAgent' object has no attribute 'as_chat_engine'
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 165, in generate_chat
+    chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine=chat_engine, session_id=session_id)
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\utils\chat_memory.py", line 35, in apply_chat_memory
+    return chat_engine.as_chat_engine(chat_history=chat_memory)
+AttributeError: 'ReActAgent' object has no attribute 'as_chat_engine'

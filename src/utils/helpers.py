@@ -4,7 +4,8 @@ from llama_index.llms.groq import Groq
 from llama_index.core import (
     VectorStoreIndex, 
     SimpleDirectoryReader, 
-    Settings, StorageContext, 
+    Settings,
+    StorageContext, 
     load_index_from_storage
 )
 from llama_index.vector_stores.chroma import ChromaVectorStore

@@ -1,13 +1,16 @@
 import os, tempfile, traceback
 from typing import List, Literal, Any
-from fastapi import FastAPI, Request, Form, UploadFile, Depends
+from fastapi import FastAPI, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.responses import PlainTextResponse
 from llama_index.core import (
     VectorStoreIndex, 
     SimpleDirectoryReader, 
-    Settings, StorageContext, 
+    Settings,
+    StorageContext, 
     load_index_from_storage
 )
+from cachetools import TTLCache
+
 
 from src.utils.helpers import (
     upload_files, QueryEngineError, init_chroma, get_vector_store, get_kb_size
@@ -17,6 +20,7 @@ from src.utils.models import LLMClient
 from dotenv import load_dotenv;load_dotenv()
 from src.main import qa_engine
 from src.config.appconfig import groq_key
+from src.utils.chat_memory import chat_memory_manager, generate_session_id
 
 app = FastAPI()
 
@@ -35,6 +39,7 @@ app = FastAPI()
 #         return state
 
 # state = EmbeddingState()
+        
 
 @app.get('/healthz')
 async def health():
@@ -42,12 +47,12 @@ async def health():
         "application": "Simple LLM API",
         "message": "running succesfully"
     }
+    
 
 @app.post('/upload')
 async def process(
     projectUuid: str = Form(...),
-    files: List[UploadFile] = None,
-    # state: EmbeddingState = Depends(EmbeddingState.get_embdding_state)
+    files: List[UploadFile] = None
 ):
 
     try:
@@ -56,7 +61,6 @@ async def process(
             _uploaded = await upload_files(files, temp_dir)
 
             if _uploaded["status_code"]==200:
-
                 documents = SimpleDirectoryReader(temp_dir).load_data()
                 
                 
@@ -99,14 +103,17 @@ async def process(
 
 @app.post('/generate')
 async def generate_chat(
-    request: Request,
-    # state: EmbeddingState = Depends(EmbeddingState.get_embdding_state)
+    request: Request
 ):
 
     # Parse the incoming request JSON
     query = await request.json()
     model = query["model"]
     temperature = query["temperature"]
+    session_id = query.get("session_id")
+    
+    if not session_id:
+        session_id = generate_session_id()
 
     # Debugging: Print the Groq API key to ensure it exists
     print("Groq API Key:", groq_key)
@@ -114,7 +121,6 @@ async def generate_chat(
     init_client = LLMClient(
         groq_api_key = groq_key,
         secrets_path="./service_account.json",
-        # secrets_path=r"src\config\service_account.json",
         temperature=temperature,
         max_output_tokens=512
     )
@@ -151,24 +157,47 @@ async def generate_chat(
     print(f"Retrieving top {choice_k} chunks from knowledge base ::: {collection_size}")
 
     try:
-        # Generate the response using the QA engine
-        response = qa_engine(
-            query["question"], 
-            embedding,
-            llm_client,
-            choice_k=choice_k
+        chat_engine = embedding.as_chat_engine(
+            llm=llm_client,
+            similarity_top_k=choice_k,
+            verbose=True,
         )
+        chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine=chat_engine, session_id=session_id)
+        
+        response = chat_engine_with_memory.chat(query["question"])
+        
+        chat_memory_manager.add_message(session_id, "human", query["question"])
+        chat_memory_manager.add_message(session_id, "ai", response.response)
+        
+        return PlainTextResponse(content=response.response, status_code=200, headers={"X-Session-ID": session_id})
+        
+        # # Generate the response using the QA engine
+        # response = qa_engine(
+        #     query["question"], 
+        #     embedding,
+        #     llm_client,
+        #     choice_k=choice_k
+        # )
 
-        print(response.response)
-        return PlainTextResponse(content=response.response, status_code=200)
+        # print(response.response)
+        # return PlainTextResponse(content=response.response, status_code=200)
     
     except Exception as e:
-        message = f"An error occured where {model} was trying to generate a response: {e}",
-        system_logger.error(
-            message,
-            exc_info=1
-        )
+        message = f"An error occurred where {model} was trying to generate a response: {e}"
+        system_logger.error(message, exc_info=1)
         raise QueryEngineError(message)
+    
+
+@app.post('/clear_chat_history')
+async def clear_chat_history(request: Request):
+    data = await request.json()
+    session_id = data.get("session_id")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Session ID is required")
+    
+    chat_memory_manager.clear_chat_history(session_id)
+    return {"message": "Chat history cleared successfully"}
 
 
 if __name__ == "__main__":
