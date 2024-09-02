@@ -23,24 +23,7 @@ from src.config.appconfig import groq_key
 from src.utils.chat_memory import chat_memory_manager, generate_session_id
 
 app = FastAPI()
-
-# class EmbeddingState:
-#     """
-#     Implementation of dependency injection intended for working locally with \
-#         embeddings via in-session storage. It allows you to have session-wide access \
-#             to embeddings across the different endpoints. \
-#                 This is not ideal for production.
-#     """
-
-#     def __init__(self):
-#         self.embedding = None
-
-#     def get_embdding_state():
-#         return state
-
-# state = EmbeddingState()
         
-
 @app.get('/healthz')
 async def health():
     return {
@@ -62,13 +45,6 @@ async def process(
 
             if _uploaded["status_code"]==200:
                 documents = SimpleDirectoryReader(temp_dir).load_data()
-                
-                
-                # embedding = VectorStoreIndex.from_documents(documents)
-                # embedding_save_dir = f"src/week_3/day_4_robust_rag/vector_db/{projectUuid}"
-                # os.makedirs(embedding_save_dir, exist_ok=True)
-                # embedding.storage_context.persist(persist_dir=embedding_save_dir)
-                
                 
                 collection_name = projectUuid
                 chroma_collection = init_chroma(collection_name=collection_name, path=r"src\chromadb")
@@ -101,12 +77,155 @@ async def process(
         }
 
 
-@app.post('/generate')
-async def generate_chat(
-    request: Request
-):
+# @app.post('/generate')
+# async def generate_chat(
+#     request: Request
+# ):
 
-    # Parse the incoming request JSON
+#     # Parse the incoming request JSON
+#     query = await request.json()
+#     model = query["model"]
+#     temperature = query["temperature"]
+#     session_id = query.get("session_id")
+    
+#     if not session_id:
+#         session_id = generate_session_id()
+
+#     # Debugging: Print the Groq API key to ensure it exists
+#     print("Groq API Key:", groq_key)
+    
+#     init_client = LLMClient(
+#         groq_api_key = groq_key,
+#         secrets_path="./service_account.json",
+#         temperature=temperature,
+#         max_output_tokens=512
+#     )
+    
+#     llm_client = init_client.map_client_to_model(model)
+    
+#     # embedding_path = f'src/week_3/day_4_robust_rag/vector_db/{query["projectUuid"]}'
+#     # storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
+#     # embedding = load_index_from_storage(storage_context)
+    
+#     chroma_collection = init_chroma(collection_name=query["projectUuid"], path=r"src\chromadb")
+#     collection_size = get_kb_size(chroma_collection)
+#     print(f"Retrieved collection size ::: {collection_size}")
+    
+#     vector_store = get_vector_store(chroma_collection=chroma_collection)
+#     # storage_context = StorageContext.from_defaults(vector_store=vector_store)
+#     embedding = VectorStoreIndex.from_vector_store(
+#         vector_store=vector_store,
+#         # storage_context=storage_context
+#     )
+    
+#     def determine_choice_k(collection_size):
+#         if collection_size > 150:
+#             return 40
+#         elif collection_size > 50:
+#             return 20
+#         elif collection_size > 20:
+#             return 10
+#         else:
+#             return 5
+
+#     choice_k = determine_choice_k(collection_size)
+
+#     print(f"Retrieving top {choice_k} chunks from knowledge base ::: {collection_size}")
+
+#     try:
+#         chat_engine = embedding.as_chat_engine(
+#             llm=llm_client,
+#             similarity_top_k=choice_k,
+#             verbose=True,
+#         )
+#         chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine=chat_engine, session_id=session_id)
+        
+#         response = chat_engine_with_memory.chat(query["question"])
+        
+#         chat_memory_manager.add_message(session_id, "human", query["question"])
+#         chat_memory_manager.add_message(session_id, "ai", response.response)
+        
+#         return PlainTextResponse(content=response.response, status_code=200, headers={"X-Session-ID": session_id})
+        
+#         # # Generate the response using the QA engine
+#         # response = qa_engine(
+#         #     query["question"], 
+#         #     embedding,
+#         #     llm_client,
+#         #     choice_k=choice_k
+#         # )
+
+#         # print(response.response)
+#         # return PlainTextResponse(content=response.response, status_code=200)
+    
+#     except Exception as e:
+#         message = f"An error occurred where {model} was trying to generate a response: {e}"
+#         system_logger.error(message, exc_info=1)
+#         raise QueryEngineError(message)
+    
+
+
+# # @app.post('/generate')
+# # async def generate_chat(request: Request):
+#     query = await request.json()
+#     model = query["model"]
+#     temperature = query["temperature"]
+#     session_id = query.get("session_id")
+
+#     if not session_id:
+#         session_id = generate_session_id()
+
+#     print("Groq API Key:", groq_key)
+
+#     init_client = LLMClient(
+#         groq_api_key=groq_key,
+#         secrets_path="./service_account.json",
+#         temperature=temperature,
+#         max_output_tokens=512
+#     )
+
+#     llm_client = init_client.map_client_to_model(model)
+
+#     chroma_collection = init_chroma(collection_name=query["projectUuid"], path=r"src\chromadb")
+#     collection_size = get_kb_size(chroma_collection)
+#     print(f"Retrieved collection size ::: {collection_size}")
+
+#     vector_store = get_vector_store(chroma_collection=chroma_collection)
+#     embedding = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+#     def determine_choice_k(collection_size):
+#         if collection_size > 150:
+#             return 40
+#         elif collection_size > 50:
+#             return 20
+#         elif collection_size > 20:
+#             return 10
+#         else:
+#             return 5
+
+#     choice_k = determine_choice_k(collection_size)
+
+#     print(f"Retrieving top {choice_k} chunks from knowledge base ::: {collection_size}")
+
+#     try:
+#         query_engine = embedding.as_query_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
+#         chat_memory = chat_memory_manager.get_chat_memory(session_id)
+#         response = query_engine.query(query["question"], chat_history=chat_memory)
+
+#         chat_memory_manager.add_message(session_id, "human", query["question"])
+#         chat_memory_manager.add_message(session_id, "ai", response.response)
+
+#         return PlainTextResponse(content=response.response, status_code=200, headers={"X-Session-ID": session_id})
+
+#     except Exception as e:
+#         message = f"An error occurred where {model} was trying to generate a response: {e}"
+#         system_logger.error(message, exc_info=1)
+#         raise QueryEngineError(message)
+
+
+
+@app.post('/generate')
+async def generate_chat(request: Request):
     query = await request.json()
     model = query["model"]
     temperature = query["temperature"]
@@ -115,11 +234,10 @@ async def generate_chat(
     if not session_id:
         session_id = generate_session_id()
 
-    # Debugging: Print the Groq API key to ensure it exists
     print("Groq API Key:", groq_key)
     
     init_client = LLMClient(
-        groq_api_key = groq_key,
+        groq_api_key=groq_key,
         secrets_path="./service_account.json",
         temperature=temperature,
         max_output_tokens=512
@@ -127,20 +245,12 @@ async def generate_chat(
     
     llm_client = init_client.map_client_to_model(model)
     
-    # embedding_path = f'src/week_3/day_4_robust_rag/vector_db/{query["projectUuid"]}'
-    # storage_context = StorageContext.from_defaults(persist_dir=embedding_path)
-    # embedding = load_index_from_storage(storage_context)
-    
     chroma_collection = init_chroma(collection_name=query["projectUuid"], path=r"src\chromadb")
     collection_size = get_kb_size(chroma_collection)
     print(f"Retrieved collection size ::: {collection_size}")
     
     vector_store = get_vector_store(chroma_collection=chroma_collection)
-    # storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    embedding = VectorStoreIndex.from_vector_store(
-        vector_store=vector_store,
-        # storage_context=storage_context
-    )
+    embedding = VectorStoreIndex.from_vector_store(vector_store=vector_store)
     
     def determine_choice_k(collection_size):
         if collection_size > 150:
@@ -157,35 +267,25 @@ async def generate_chat(
     print(f"Retrieving top {choice_k} chunks from knowledge base ::: {collection_size}")
 
     try:
-        chat_engine = embedding.as_chat_engine(
-            llm=llm_client,
-            similarity_top_k=choice_k,
-            verbose=True,
-        )
-        chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine=chat_engine, session_id=session_id)
+        chat_engine = embedding.as_chat_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
+        chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
         
         response = chat_engine_with_memory.chat(query["question"])
         
-        chat_memory_manager.add_message(session_id, "human", query["question"])
-        chat_memory_manager.add_message(session_id, "ai", response.response)
+        # chat_memory_manager.add_message(session_id, "human", query["question"])
+        # chat_memory_manager.add_message(session_id, "ai", response.response)
         
-        return PlainTextResponse(content=response.response, status_code=200, headers={"X-Session-ID": session_id})
-        
-        # # Generate the response using the QA engine
-        # response = qa_engine(
-        #     query["question"], 
-        #     embedding,
-        #     llm_client,
-        #     choice_k=choice_k
-        # )
+        chat_memory_manager.add_message(session_id, f"Human: {query['question']}")
+        chat_memory_manager.add_message(session_id, f"AI: {response.response}")
 
-        # print(response.response)
-        # return PlainTextResponse(content=response.response, status_code=200)
+        return PlainTextResponse(content=response.response, status_code=200, headers={"X-Session-ID": session_id})
     
     except Exception as e:
         message = f"An error occurred where {model} was trying to generate a response: {e}"
         system_logger.error(message, exc_info=1)
         raise QueryEngineError(message)
+
+
     
 
 @app.post('/clear_chat_history')
