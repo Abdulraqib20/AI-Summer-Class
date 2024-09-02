@@ -222,3 +222,51 @@ Traceback (most recent call last):
   File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\utils\chat_memory.py", line 35, in apply_chat_memory
     return chat_engine.as_chat_engine(chat_history=chat_memory)
 AttributeError: 'ReActAgent' object has no attribute 'as_chat_engine'
+2024-09-02 14:17:23,271 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: missing a required argument: 'message'
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 165, in generate_chat
+    chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine=chat_engine, session_id=session_id)
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\utils\chat_memory.py", line 35, in apply_chat_memory
+    return chat_engine.chat(chat_history=chat_memory)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 247, in wrapper
+    bound_args = inspect.signature(func).bind(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\inspect.py", line 3045, in bind
+    return self._bind(args, kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\inspect.py", line 2960, in _bind
+    raise TypeError(msg) from None
+TypeError: missing a required argument: 'message'
+2024-09-02 16:03:35,627 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: got an unexpected keyword argument 'chat_history'
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 237, in generate_chat
+    response = query_engine.query(query["question"], chat_history=chat_memory)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\site-packages\llama_index\core\instrumentation\dispatcher.py", line 247, in wrapper
+    bound_args = inspect.signature(func).bind(*args, **kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\inspect.py", line 3045, in bind
+    return self._bind(args, kwargs)
+  File "C:\Users\Dell\anaconda3\envs\aisc\lib\inspect.py", line 3034, in _bind
+    raise TypeError(
+TypeError: got an unexpected keyword argument 'chat_history'
+2024-09-02 16:06:41,428 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: 'ReActAgent' object has no attribute 'as_chat_engine'
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 165, in generate_chat
+    chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine=chat_engine, session_id=session_id)
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\utils\chat_memory.py", line 36, in apply_chat_memory
+    return chat_engine.as_chat_engine(chat_history=chat_memory)
+AttributeError: 'ReActAgent' object has no attribute 'as_chat_engine'
+2024-09-02 21:53:17,404 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: put() takes 2 positional arguments but 3 were given
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 299, in generate_chat
+    chat_memory_manager.add_message(session_id, "human", query["question"])
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\utils\chat_memory.py", line 64, in add_message
+    chat_memory.put(role, message)
+TypeError: put() takes 2 positional arguments but 3 were given
+2024-09-02 22:18:32,129 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: 'NoneType' object has no attribute 'chat'
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 297, in generate_chat
+    response = chat_engine_with_memory.chat(query["question"])
+AttributeError: 'NoneType' object has no attribute 'chat'
+2024-09-02 22:26:40,646 - system_logger- ERROR - An error occurred where llama-3.1-70b-versatile was trying to generate a response: add_message() takes 3 positional arguments but 4 were given
+Traceback (most recent call last):
+  File "C:\Users\Dell\Desktop\Machine Learning\AI Summer Class\AI-Summer-Class\src\app.py", line 299, in generate_chat
+    chat_memory_manager.add_message(session_id, "human", query["question"])
+TypeError: add_message() takes 3 positional arguments but 4 were given
