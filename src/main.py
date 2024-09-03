@@ -1,7 +1,9 @@
 # import numpy as np
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from llama_index.llms.groq import Groq
 from llama_index.core import (
     VectorStoreIndex, 
@@ -12,12 +14,16 @@ from llama_index.core import (
 )
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import PromptTemplate
+from llama_index.core.node_parser import TokenTextSplitter
 
+# from src.config import appconfig
 from src.config import appconfig
 from dotenv import load_dotenv;load_dotenv()
 from src.utils.chat_memory import chat_memory_manager, generate_session_id
+from src.prompts.instruction import INSTPROMPT
 
-print("...")
+print("Initializing LLM application...")
 
 
 
@@ -58,9 +64,7 @@ Settings.embed_model = HuggingFaceEmbedding(
 
 def upload_doc(dir):
 
-    from llama_index.core.node_parser import TokenTextSplitter
-
-    print("Uploading...")
+    print("Uploading documents...")
     documents = SimpleDirectoryReader(dir).load_data() 
 
     """You can apply splitting with global Settings"""
@@ -93,42 +97,44 @@ def upload_doc(dir):
 
 
 def qa_engine(query: str, index, llm_client, choice_k=5, session_id=None):
-    chat_engine = index.as_chat_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
-    if session_id:
-        chat_engine = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
+    if not session_id:
+        session_id = generate_session_id()
     
-    response = chat_engine.chat(query)
+    custom_prompt = PromptTemplate(INSTPROMPT)
     
-    if session_id:
-        chat_memory_manager.add_message(session_id, "human", query)
-        chat_memory_manager.add_message(session_id, "ai", response.response)
-
-    return response
+    query_engine = index.as_query_engine(
+        llm=llm_client, 
+        similarity_top_k=choice_k, 
+        verbose=True,
+        system_prompt=custom_prompt
+    )
+    
+    query_engine_with_memory = chat_memory_manager.apply_chat_memory(query_engine, session_id)
+    
+    chat_history = chat_memory_manager.get_chat_history(session_id)
+    response = query_engine_with_memory.query(query, chat_history=chat_history)
+    
+    chat_memory_manager.add_message(session_id, "human", query)
+    chat_memory_manager.add_message(session_id, "ai", response.response)
+    
+    return response, session_id
 
 
 
 if __name__ == "__main__":
     index = upload_doc("./data")
-    session_id = generate_session_id()
-    print(f"Session ID: {session_id}")
+    session_id = None
     
     while True:
-        query = input("Ask me anything (or type 'quit' to exit): ")
-        if query.lower() == 'quit':
+        query = input("Ask me anything (or type 'exit' to quit): ")
+        if query.lower() == 'exit':
             break
         
         model = input("Enter model code: ")
         llm_client = Groq(model, api_key=GROQ_API_KEY, temperature=0.1)
         
-        response = qa_engine(query, index, llm_client, session_id)
-        print(response)
+        response, session_id = qa_engine(query, index, llm_client, session_id=session_id)
         
-        print("\n Chat History: ")
-        for role, message in chat_memory_manager.get_chat_history(session_id):
-            print(f"{role.capitalize()}: {message}")
-            
-        clear_history = input("Do you want to clear the chat history? (yes/no): ")
-        if clear_history.lower() == 'yes':
-            chat_memory_manager.clear_chat_history(session_id)
-            print("Chat history cleared.")
+        print(f"Response: {response}")
+        print(f"Session ID: {session_id}")
 

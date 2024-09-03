@@ -9,6 +9,8 @@ from llama_index.core import (
     StorageContext, 
     load_index_from_storage
 )
+from llama_index.core import PromptTemplate
+from llama_index.core.agent import ReActAgent
 from cachetools import TTLCache
 
 
@@ -21,6 +23,7 @@ from dotenv import load_dotenv;load_dotenv()
 from src.main import qa_engine
 from src.config.appconfig import groq_key
 from src.utils.chat_memory import chat_memory_manager, generate_session_id
+from src.prompts.instruction import INSTPROMPT
 
 app = FastAPI()
         
@@ -267,17 +270,40 @@ async def generate_chat(request: Request):
     print(f"Retrieving top {choice_k} chunks from knowledge base ::: {collection_size}")
 
     try:
-        chat_engine = embedding.as_chat_engine(llm=llm_client, similarity_top_k=choice_k, verbose=True)
+        custom_prompt = PromptTemplate(INSTPROMPT)
+        
+        chat_engine = embedding.as_chat_engine(
+            llm=llm_client, 
+            similarity_top_k=choice_k, 
+            verbose=True,
+            system_prompt=custom_prompt
+        )
         chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
         
-        response = chat_engine_with_memory.chat(query["question"])
+        chat_history = chat_memory_manager.get_chat_history(session_id)
+        response = chat_engine_with_memory.chat(
+            message=query["question"],
+            chat_history=chat_history
+        )
         
-        # chat_memory_manager.add_message(session_id, "human", query["question"])
-        # chat_memory_manager.add_message(session_id, "ai", response.response)
+         # Apply chat memory
+        chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
         
-        chat_memory_manager.add_message(session_id, f"Human: {query['question']}")
-        chat_memory_manager.add_message(session_id, f"AI: {response.response}")
-
+        # Get chat history
+        chat_history = chat_memory_manager.get_chat_history(session_id)
+        
+        # Generate response
+        if isinstance(chat_engine_with_memory, ReActAgent):
+            response = chat_engine_with_memory.chat(query["question"])
+        else:
+            response = chat_engine_with_memory.chat(
+                message=query["question"],
+                chat_history=chat_history
+            )
+        
+        chat_memory_manager.add_message(session_id, "human", query["question"])
+        chat_memory_manager.add_message(session_id, "ai", response.response)
+        
         return PlainTextResponse(content=response.response, status_code=200, headers={"X-Session-ID": session_id})
     
     except Exception as e:
@@ -285,8 +311,6 @@ async def generate_chat(request: Request):
         system_logger.error(message, exc_info=1)
         raise QueryEngineError(message)
 
-
-    
 
 @app.post('/clear_chat_history')
 async def clear_chat_history(request: Request):
