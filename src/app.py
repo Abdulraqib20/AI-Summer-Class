@@ -232,7 +232,7 @@ async def generate_chat(request: Request):
     query = await request.json()
     model = query["model"]
     temperature = query["temperature"]
-    session_id = query.get("session_id")
+    session_id = query.get("session_id", generate_session_id())
     
     if not session_id:
         session_id = generate_session_id()
@@ -278,28 +278,25 @@ async def generate_chat(request: Request):
             verbose=True,
             system_prompt=custom_prompt
         )
-        chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
         
-        chat_history = chat_memory_manager.get_chat_history(session_id)
-        response = chat_engine_with_memory.chat(
-            message=query["question"],
-            chat_history=chat_history
-        )
-        
-         # Apply chat memory
+        # Apply chat memory
         chat_engine_with_memory = chat_memory_manager.apply_chat_memory(chat_engine, session_id)
         
         # Get chat history
         chat_history = chat_memory_manager.get_chat_history(session_id)
         
         # Generate response
-        if isinstance(chat_engine_with_memory, ReActAgent):
-            response = chat_engine_with_memory.chat(query["question"])
-        else:
-            response = chat_engine_with_memory.chat(
-                message=query["question"],
-                chat_history=chat_history
-            )
+        response = chat_engine_with_memory.chat(
+            message=query["question"],
+            chat_history=chat_history
+        )
+        # if isinstance(chat_engine_with_memory, ReActAgent):
+        #     response = chat_engine_with_memory.chat(query["question"])
+        # else:
+        #     response = chat_engine_with_memory.chat(
+        #         message=query["question"],
+        #         chat_history=chat_history
+        #     )
         
         chat_memory_manager.add_message(session_id, "human", query["question"])
         chat_memory_manager.add_message(session_id, "ai", response.response)

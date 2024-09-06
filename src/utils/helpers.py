@@ -16,10 +16,10 @@ from src.exceptions.operationshandler import system_logger, eval_logger, llmresp
 
 
 
-allowed_files = ["txt", "csv", "json", "pdf", "doc", "docx", "pptx"]
+ALLOWED_EXTENSIONS = ["txt", "csv", "json", "pdf", "doc", "docx", "pptx"]
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_files
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def file_checks(files):
@@ -40,7 +40,7 @@ def file_checks(files):
         if not allowed_file(file.filename):
             print(file.filename)
             return {
-                "detail": f"File format not supported. Use any of {allowed_files}",
+                "detail": f"File format not supported. Use any of {ALLOWED_EXTENSIONS}",
                 "status_code": 415
             }
     

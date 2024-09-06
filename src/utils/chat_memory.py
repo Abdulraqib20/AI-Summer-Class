@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.query_engine import BaseQueryEngine
 from llama_index.core.agent import ReActAgent
+from llama_index.core.base.llms.types import ChatMessage
 from cachetools import TTLCache
 
 MEMORY_TOKEN_LIMIT = 1024
@@ -18,18 +19,29 @@ class ChatMemoryManager:
 
     def add_message(self, session_id: str, role: str, message: str):
         chat_memory = self.get_chat_memory(session_id)
-        chat_memory.put(role, message)
+        # Map 'human' to 'user' and 'ai' to 'assistant'
+        role_mapping = {
+            'human': 'user',
+            'ai': 'assistant'
+        }
+        mapped_role = role_mapping.get(role, role)
+        chat_message = ChatMessage(role=mapped_role, content=message)
+        chat_memory.put(chat_message)
         self.cache[session_id] = True  # Update cache to keep session alive
         
-    def add_message(self, session_id: str, role: str, message: str):
-        chat_memory = self.get_chat_memory(session_id)
-        chat_memory.put(f"{role}: {message}")  # Combine role and message
-        self.cache[session_id] = True  # Update cache to keep session alive
+    # def add_message(self, session_id: str, role: str, message: str):
+    #     chat_memory = self.get_chat_memory(session_id)
+    #     chat_memory.put(f"{role}: {message}")  # Combine role and message
+    #     self.cache[session_id] = True  # Update cache to keep session alive
+
+    # def get_chat_history(self, session_id: str) -> List[Tuple[str, str]]:
+    #     chat_memory = self.get_chat_memory(session_id)
+    #     return chat_memory.get()
 
     def get_chat_history(self, session_id: str) -> List[Tuple[str, str]]:
         chat_memory = self.get_chat_memory(session_id)
-        return chat_memory.get()
-
+        return [(msg.role, msg.content) for msg in chat_memory.get()]
+    
     def clear_chat_history(self, session_id: str):
         if session_id in self.memories:
             del self.memories[session_id]
@@ -38,13 +50,12 @@ class ChatMemoryManager:
 
     def apply_chat_memory(self, engine, session_id: str):
         chat_memory = self.get_chat_memory(session_id)
-        # if isinstance(engine, BaseQueryEngine):
-        #     return engine.as_chat_engine(chat_memory=chat_memory)
         if isinstance(engine, ReActAgent):
             engine.memory = chat_memory
             return engine
         else:
-            raise ValueError(f"Unsupported engine type: {type(engine)}")
+            return engine.as_chat_engine(chat_memory=chat_memory)
+            # raise ValueError(f"Unsupported engine type: {type(engine)}")
 
 
 chat_memory_manager = ChatMemoryManager()
