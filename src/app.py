@@ -284,12 +284,13 @@ async def generate_chat(request: Request):
         
         # Get chat history
         chat_history = chat_memory_manager.get_chat_history(session_id)
-        
+                
         # Generate response
         response = chat_engine_with_memory.chat(
             message=query["question"],
             chat_history=chat_history
         )
+        
         # if isinstance(chat_engine_with_memory, ReActAgent):
         #     response = chat_engine_with_memory.chat(query["question"])
         # else:

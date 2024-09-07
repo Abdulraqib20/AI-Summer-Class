@@ -19,7 +19,6 @@ class ChatMemoryManager:
 
     def add_message(self, session_id: str, role: str, message: str):
         chat_memory = self.get_chat_memory(session_id)
-        # Map 'human' to 'user' and 'ai' to 'assistant'
         role_mapping = {
             'human': 'user',
             'ai': 'assistant'
@@ -38,9 +37,9 @@ class ChatMemoryManager:
     #     chat_memory = self.get_chat_memory(session_id)
     #     return chat_memory.get()
 
-    def get_chat_history(self, session_id: str) -> List[Tuple[str, str]]:
+    def get_chat_history(self, session_id: str) -> List[ChatMessage]:
         chat_memory = self.get_chat_memory(session_id)
-        return [(msg.role, msg.content) for msg in chat_memory.get()]
+        return chat_memory.get()
     
     def clear_chat_history(self, session_id: str):
         if session_id in self.memories:
@@ -55,8 +54,6 @@ class ChatMemoryManager:
             return engine
         else:
             return engine.as_chat_engine(chat_memory=chat_memory)
-            # raise ValueError(f"Unsupported engine type: {type(engine)}")
-
 
 chat_memory_manager = ChatMemoryManager()
 
